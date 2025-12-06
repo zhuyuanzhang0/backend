@@ -1,0 +1,21 @@
+[project]
+name = "apple"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.123.9",
+    "langchain-core>=1.1.1",
+    "langgraph>=1.0.4",
+    "openai>=2.9.0",
+    "pydantic>=2.12.5",
+    "pymysql>=1.1.2",
+    "python-dotenv>=1.2.1",
+    "python-multipart>=0.0.20",
+    "uvicorn>=0.38.0",
+]
+
+[[tool.uv.index]]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
