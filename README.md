@@ -16,10 +16,10 @@
 
 ## 本地开发：安装与运行
 ```powershell
-# 安装依赖（使用 uv 工具）
+# 安装依赖
 uv sync
 
-# 开发模式运行（默认端口 9000，使用 .env 中配置）
+# 开发模式运行
 uv run -m app.main
 ```
 
@@ -31,7 +31,6 @@ uv run -m app.main
 - `record_position`：位置表 `position_record`
 
 ## API 概览
-（所有接口默认挂在根路由，上传字段名通常为 `img`）
 
 - `POST /img` — 上传图片到图床，返回 JSON：`{ "message": "...", "filename": "...", "url": "..." }`
 - `POST /cal` — 从日程/备忘类图片识别日程信息，返回标准化 JSON
@@ -51,13 +50,13 @@ app/
   main.py          # FastAPI 入口，包含静态文件挂载与启动逻辑
   api/routes.py    # 路由定义与请求处理
   core/
-    config.py      # 配置与常量（例如 UPLOAD_DIR）
+    config.py      # 配置与常量
     logger.py      # 日志设置
   db/
     init.py        # DB 初始化函数
     tools.py       # DB 操作工具
-functions/
-  alm/             # 与 LLM 交互的封装与提示词
-  common/          # 图片保存、解析等通用工具
+  functions/
+    alm/             # 与 LLM 交互的封装与提示词
+    common/          # 图片保存、解析等通用工具
 uploads/           # 运行时的上传目录
 ```
