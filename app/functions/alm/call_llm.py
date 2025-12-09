@@ -57,7 +57,7 @@ async def calendar_llm(img: UploadFile) -> dict:
 
         url = "https://api.siliconflow.cn/v1/chat/completions"
 
-        response = requests.post(url, json=payload, headers=headers, timeout=15)
+        response = requests.post(url, json=payload, headers=headers, timeout=60)
         resp_json = response.json()
         content = resp_json["choices"][0]["message"]["content"]
         json_obj = json.loads(content)
@@ -119,7 +119,7 @@ async def vcode_llm(img: UploadFile):
 
         url = "https://api.siliconflow.cn/v1/chat/completions"
 
-        response = requests.post(url, json=payload, headers=headers, timeout=15)
+        response = requests.post(url, json=payload, headers=headers, timeout=60)
         resp_json = response.json()
         print(resp_json)
         content = resp_json["choices"][0]["message"]["content"]
@@ -176,7 +176,7 @@ async def vcode_llm_text(text):
 
         url = "https://api.siliconflow.cn/v1/chat/completions"
 
-        response = requests.post(url, json=payload, headers=headers, timeout=15)
+        response = requests.post(url, json=payload, headers=headers, timeout=60)
         resp_json = response.json()
         print(resp_json)
         content = resp_json["choices"][0]["message"]["content"]
@@ -239,7 +239,7 @@ async def bill_llm(content, position):
 
         url = "https://api.siliconflow.cn/v1/chat/completions"
 
-        response = requests.post(url, json=payload, headers=headers, timeout=15)
+        response = requests.post(url, json=payload, headers=headers, timeout=60)
         resp_json = response.json()
         content = resp_json["choices"][0]["message"]["content"]
         json_obj = json.loads(content)
