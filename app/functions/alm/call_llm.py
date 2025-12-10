@@ -6,6 +6,8 @@ import base64
 from dotenv import load_dotenv
 import requests
 import json
+import asyncio
+import httpx
 from app.db.tools import insert_bill
 
 # 默认会加载当前工作目录下的 .env 文件
@@ -239,14 +241,21 @@ async def bill_llm(content, position):
 
         url = "https://api.siliconflow.cn/v1/chat/completions"
 
-        response = requests.post(url, json=payload, headers=headers, timeout=60)
+        # 使用异步 HTTP 客户端避免在事件循环中阻塞
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            response = await client.post(url, json=payload, headers=headers)
         resp_json = response.json()
         content = resp_json["choices"][0]["message"]["content"]
         json_obj = json.loads(content)
         json_obj['position'] = position
-        insert_bill(json_obj)
+        # 将同步的数据库插入放到线程池中执行，防止阻塞事件循环
+        await asyncio.to_thread(insert_bill, json_obj)
         print(json_obj)
+        return json_obj
 
 
     except Exception as e:
-        print(e)
+        raise HTTPException(
+            status_code=500,
+            detail=str(e),
+        )
