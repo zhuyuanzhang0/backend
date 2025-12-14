@@ -9,6 +9,8 @@ import json
 import asyncio
 import httpx
 from app.db.tools import insert_bill
+import logging
+logger = logging.getLogger("app")  # 自定义一个 logger 名称
 
 # 默认会加载当前工作目录下的 .env 文件
 load_dotenv()
@@ -63,7 +65,6 @@ async def calendar_llm(img: UploadFile) -> dict:
         resp_json = response.json()
         content = resp_json["choices"][0]["message"]["content"]
         json_obj = json.loads(content)
-        print(json_obj)
         return json_obj
 
 
@@ -123,9 +124,7 @@ async def vcode_llm(img: UploadFile):
 
         response = requests.post(url, json=payload, headers=headers, timeout=60)
         resp_json = response.json()
-        print(resp_json)
         content = resp_json["choices"][0]["message"]["content"]
-        print(content)
         return content
 
 
@@ -180,9 +179,7 @@ async def vcode_llm_text(text):
 
         response = requests.post(url, json=payload, headers=headers, timeout=60)
         resp_json = response.json()
-        print(resp_json)
         content = resp_json["choices"][0]["message"]["content"]
-        print(content)
         return content
 
 
@@ -242,15 +239,24 @@ async def bill_llm(content, position):
         url = "https://api.siliconflow.cn/v1/chat/completions"
 
         # 使用异步 HTTP 客户端避免在事件循环中阻塞
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            response = await client.post(url, json=payload, headers=headers)
+        for _ in range(3):
+            try:
+                async with httpx.AsyncClient(timeout=60.0) as client:
+                    response = await client.post(url, json=payload, headers=headers)
+                break
+            except httpx.TimeoutException:
+                logger.error("TimeoutException")
+                continue
+        logger.info("bill : " + str(response.json()) )
+
+
+        # async with httpx.AsyncClient(timeout=60.0) as client:
+        #     response = await client.post(url, json=payload, headers=headers)
         resp_json = response.json()
-        content = resp_json["choices"][0]["message"]["content"]
         json_obj = json.loads(content)
         json_obj['position'] = position
         # 将同步的数据库插入放到线程池中执行，防止阻塞事件循环
         await asyncio.to_thread(insert_bill, json_obj)
-        print(json_obj)
         return json_obj
 
 
