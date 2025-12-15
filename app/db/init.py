@@ -93,3 +93,49 @@ def init_bills_db():
     finally:
         conn.close()
         print("连接已关闭")
+
+
+
+def init_kv_db():
+    # 连接到 MySQL
+    conn = pymysql.connect(
+        host=HOST,
+        port=PORT,
+        user=USER,
+        password=PASSWORD,
+        charset="utf8mb4",
+        autocommit=True,  # 方便执行 DDL
+    )
+
+    try:
+        with conn.cursor() as cursor:
+            # 1. 创建数据库 kv（如果不存在）
+            cursor.execute(
+                "CREATE DATABASE IF NOT EXISTS `kv` "
+                "DEFAULT CHARACTER SET utf8mb4 "
+                "COLLATE utf8mb4_unicode_ci;"
+            )
+            print("数据库 kv 已确认存在/创建成功")
+
+            # 2. 切换到 kv 数据库
+            cursor.execute("USE `kv`;")
+
+            # 3. 创建表 kv（如果不存在）
+
+            create_table_sql = """
+            CREATE TABLE IF NOT EXISTS `kv` (
+                `k` VARCHAR(255) NOT NULL,
+                `v` LONGTEXT NULL,
+                `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+                                ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (`k`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+            """
+            cursor.execute(create_table_sql)
+            print("数据表 kv 已确认存在/创建成功")
+
+    finally:
+        conn.close()
+        print("连接已关闭")
+
+    

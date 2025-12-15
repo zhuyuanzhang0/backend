@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from app.api.routes import router
 import uvicorn
 from fastapi.staticfiles import StaticFiles
-from app.db.init import init_bills_db, init_position_db
+from app.db.init import init_bills_db, init_position_db, init_kv_db
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 import time
@@ -12,6 +12,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 # init_bills_db()
 # init_position_db()
+# init_kv_db()
 
 logger = logging.getLogger("app")
 

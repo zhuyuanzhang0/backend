@@ -8,6 +8,7 @@ from app.functions.common.img import save_image_file
 from app.functions.alm.call_llm import calendar_llm, bill_llm, vcode_llm, vcode_llm_text
 from app.core.config import UPLOAD_DIR
 from app.db.tools import query_bills, update_bill, insert_position
+from app.db import kv_tools
 import asyncio
 router = APIRouter()
 
@@ -31,6 +32,29 @@ async def upload_image(img: UploadFile = File(...)):
         )
 
     return result
+
+
+class KVSetBody(BaseModel):
+    k: str
+    v: str
+
+
+class KVGetBody(BaseModel):
+    k: str
+
+
+@router.post("/kv/set")
+async def kv_set(body: KVSetBody):
+    kv_tools.set(body.k, body.v)
+    return {"k": body.k, "v": body.v}
+
+
+@router.post("/kv/get")
+async def kv_get(body: KVGetBody):
+    value = kv_tools.get(body.k)
+    if value is None:
+        raise HTTPException(status_code=404, detail="key not found")
+    return {"k": body.k, "v": value}
 
 
 @router.post("/cal")
@@ -189,7 +213,6 @@ async def add_position(body: PositionBody):
         )
 
     return result
-
 
 
 
