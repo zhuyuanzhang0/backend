@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 import os
 import pymysql
 from typing import Optional
-from app.core import log
+from app.core.logger import log
 
 
 load_dotenv()

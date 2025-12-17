@@ -9,7 +9,7 @@ import json
 import asyncio
 import httpx
 from app.db.tools import insert_bill
-from app.core import log
+from app.core.logger import log
 
 # 默认会加载当前工作目录下的 .env 文件
 load_dotenv()
