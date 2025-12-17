@@ -14,7 +14,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 # init_kv_db()
 
 app = FastAPI()
-from fastapi import FastAPIfrom uvicorn.config import LOGGING_CONFIG    
+from uvicorn.config import LOGGING_CONFIG    
 LOGGING_CONFIG["formatters"]["default"]["fmt"] = "%(asctime)s - %(levelprefix)s %(message)s"
 
 
