@@ -193,7 +193,7 @@ async def vcode(img: UploadFile = File(...)):
 class PositionBody(BaseModel):
     detail: str | None = None   # 新增字段，可选
 @router.post("/codetext")
-async def add_position(body: PositionBody):
+async def vcodetext(body: PositionBody):
     """
     插入一条位置记录
     JSON 请求体格式:
