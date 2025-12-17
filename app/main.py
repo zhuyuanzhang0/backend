@@ -15,44 +15,34 @@ from starlette.middleware.base import BaseHTTPMiddleware
 # init_kv_db()
 
 logger = logging.getLogger("app")
-
-class RequestLogMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
-        start = time.perf_counter()
-
-        try:
-            response = await call_next(request)
-        except Exception:
-            elapsed_ms = (time.perf_counter() - start) * 1000
-            logger.exception(
-                "request failed",
-                extra={
-                    "request_id": request_id,
-                    "method": request.method,
-                    "path": request.url.path,
-                    "elapsed_ms": round(elapsed_ms, 2),
-                },
-            )
-            raise
-
-        elapsed_ms = (time.perf_counter() - start) * 1000
-        response.headers["X-Request-ID"] = request_id
-
-        logger.info(
-            "request",
-            extra={
-                "request_id": request_id,
-                "method": request.method,
-                "path": request.url.path,
-                "status_code": response.status_code,
-                "elapsed_ms": round(elapsed_ms, 2),
-            },
-        )
-        return response
-
 app = FastAPI()
-app.add_middleware(RequestLogMiddleware)
+
+@app.middleware("http")
+async def access_log_middleware(request: Request, call_next):
+    start = time.perf_counter()
+    now = datetime.now(timezone.utc).isoformat()
+    client_ip = _get_client_ip(request)
+
+    status_code = 500
+    try:
+        response = await call_next(request)
+        status_code = response.status_code
+        return response
+    finally:
+        duration_ms = (time.perf_counter() - start) * 1000.0
+        logger.info(
+            '%s ip=%s method=%s path=%s status=%s dur_ms=%.2f ua="%s" referer="%s"',
+            now,
+            client_ip,
+            request.method,
+            request.url.path,
+            status_code,
+            duration_ms,
+            request.headers.get("user-agent", "-"),
+            request.headers.get("referer", "-"),
+        )
+
+
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
