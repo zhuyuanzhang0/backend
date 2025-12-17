@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import os
 import pymysql
 from typing import Optional
+from app.core import log
 
 
 load_dotenv()
@@ -38,7 +39,7 @@ def has(key: str) -> bool:
             )
             return cur.fetchone() is not None
     except Exception as e:
-        print(e)
+        log(e)
     finally:
         conn.close()
 def get(key: str) -> Optional[str]:
@@ -53,7 +54,7 @@ def get(key: str) -> Optional[str]:
             row = cur.fetchone()
             return None if row is None else row[0]
     except Exception as e:
-        print(e)
+        log(e)
     finally:
         conn.close()
 def set(key: str, value: str) -> None:
@@ -70,7 +71,7 @@ def set(key: str, value: str) -> None:
                 (key, value),
             )
     except Exception as e:
-        print(e)
+        log(e)
     finally:
         conn.close()
 def delete(key: str) -> bool:
@@ -86,7 +87,7 @@ def delete(key: str) -> bool:
             return cur.rowcount > 0
 
     except Exception as e:
-        print(e)
+        log(e)
     finally:
         conn.close()
 

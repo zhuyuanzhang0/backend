@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import os
 import pymysql
 
+from app.core import log
 
 load_dotenv()
 
@@ -58,7 +59,7 @@ def insert_bill(data: dict):
                 ),
             )
     except Exception as e:
-        print(e)
+        log(e)
     finally:
         conn.close()
 
@@ -108,7 +109,7 @@ def update_bill(bill_id: int, data: dict) -> int:
             )
         return rows 
     except Exception as e:
-        print(e)
+        log(e)
     finally:
         conn.close()
 
@@ -139,14 +140,14 @@ def query_bills(start_time: str, end_time: str):
             rows = cursor.fetchall()
             return rows
     except Exception as e:
-        print(e)
+        log(e)
     finally:
         conn.close()
 
 def insert_position(name: str, lat: float, lon: float, detail: str = None):
     """插入一条位置记录，返回新 id"""
     conn = get_conn("record_position")
-    print(name, lat, lon, detail,'234567890')
+    log(name, lat, lon, detail,'234567890')
 
     try:
         with conn.cursor() as cursor:
@@ -156,7 +157,7 @@ def insert_position(name: str, lat: float, lon: float, detail: str = None):
             """
             cursor.execute(sql, (name, lat, lon, detail))
     except Exception as e:
-        print(e)
+        log(e)
     finally:
         conn.close()
 

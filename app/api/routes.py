@@ -25,7 +25,6 @@ async def upload_image(img: UploadFile = File(...)):
     try:
         result = await save_image_file(img)
     except Exception as e:
-        print("保存图片失败: %s", e)
         raise HTTPException(
             status_code=500,
             detail="图片保存失败，请稍后重试",
@@ -70,7 +69,6 @@ async def calendar(img: UploadFile = File(...)):
     try:
         result = await calendar_llm(img)
     except Exception as e:
-        print(str(e))
         raise HTTPException(
             status_code=500,
             detail= str(e),
@@ -141,7 +139,6 @@ async def put_bill(
 
     # affected = 1 → 更新成功  
     # affected = 0 → id 不存在
-    print(affected)
     return True if affected == 1 else False
 
 
@@ -163,7 +160,6 @@ async def add_position(body: PositionBody):
         "lon": 116.321
     }
     """
-    print(body)
     asyncio.create_task(asyncio.to_thread(insert_position, body.name, body.lat, body.lon, body.detail))
     return {"message": "位置记录插入成功"}
 
@@ -181,7 +177,6 @@ async def vcode(img: UploadFile = File(...)):
     try:
         result = await vcode_llm(img)
     except Exception as e:
-        print(str(e))
         raise HTTPException(
             status_code=500,
             detail= str(e),
@@ -201,12 +196,10 @@ async def vcodetext(body: PositionBody):
         "detail": "...",
     }
     """
-    print(body)
 
     try:
         result = await vcode_llm_text(body.detail)
     except Exception as e:
-        print(str(e))
         raise HTTPException(
             status_code=500,
             detail= str(e),

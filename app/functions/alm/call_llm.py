@@ -9,8 +9,7 @@ import json
 import asyncio
 import httpx
 from app.db.tools import insert_bill
-import logging
-logger = logging.getLogger("app")  # 自定义一个 logger 名称
+from app.core import log
 
 # 默认会加载当前工作目录下的 .env 文件
 load_dotenv()
@@ -245,9 +244,9 @@ async def bill_llm(content, position):
                     response = await client.post(url, json=payload, headers=headers)
                 break
             except httpx.TimeoutException:
-                logger.error("TimeoutException")
+                log("TimeoutException","ERROR")
                 continue
-        logger.info("bill : " + str(response.json()) )
+        log("bill : " + str(response.json()) )
 
 
         # async with httpx.AsyncClient(timeout=60.0) as client:

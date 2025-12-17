@@ -46,7 +46,6 @@ def init_position_db():
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='位置记录表';
             """)
 
-            print("record_position 初始化完成")
     finally:
         conn.close()
 
@@ -69,7 +68,6 @@ def init_bills_db():
                 "DEFAULT CHARACTER SET utf8mb4 "
                 "COLLATE utf8mb4_unicode_ci;"
             )
-            print("数据库 bills 已确认存在/创建成功")
 
             # 2. 切换到 bills 数据库
             cursor.execute("USE `bills`;")
@@ -88,11 +86,9 @@ def init_bills_db():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='账单表';
             """
             cursor.execute(create_table_sql)
-            print("数据表 bill 已确认存在/创建成功")
 
     finally:
         conn.close()
-        print("连接已关闭")
 
 
 
@@ -115,7 +111,6 @@ def init_kv_db():
                 "DEFAULT CHARACTER SET utf8mb4 "
                 "COLLATE utf8mb4_unicode_ci;"
             )
-            print("数据库 kv 已确认存在/创建成功")
 
             # 2. 切换到 kv 数据库
             cursor.execute("USE `kv`;")
@@ -132,10 +127,8 @@ def init_kv_db():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
             """
             cursor.execute(create_table_sql)
-            print("数据表 kv 已确认存在/创建成功")
 
     finally:
         conn.close()
-        print("连接已关闭")
 
     
