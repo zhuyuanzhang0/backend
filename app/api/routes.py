@@ -1,11 +1,12 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Query, Form, Body
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Literal
 import os
 import datetime
 from pydantic import BaseModel
 import json
 from app.functions.common.img import save_image_file
 from app.functions.alm.call_llm import calendar_llm, bill_llm, vcode_llm, vcode_llm_text
+from app.db.agenda import insert_event, delete_event, update_event, list_events
 from app.core.config import UPLOAD_DIR
 from app.db.tools import query_bills, update_bill, insert_position
 from app.db import kv_tools
@@ -16,6 +17,127 @@ router = APIRouter()
 # 初始化上传目录
 if not os.path.exists(UPLOAD_DIR):
     os.makedirs(UPLOAD_DIR)
+
+
+
+class update_icsBody(BaseModel):
+    name: str
+@router.post("/update_ics",description="更新ics文件")
+def save_upload_replace(body: update_icsBody):
+    try:
+        if not body.name:
+            raise ValueError("名称为空")
+        
+        ics_text = export_ics(table_name=body.name, cal_name=body.name, tzid="Asia/Shanghai")
+        with open("cal.ics", "wb", encoding="utf-8", newline="") as f:
+            f.write(ics_text)
+
+        return {"status":'ok'}
+    except Exception as e:
+        return {"status":'error',"message":str(e)}
+
+
+
+
+
+# 2) Pydantic body
+class AgendaEventCreateBody(BaseModel):
+    uid: str
+    kind: Literal["VEVENT", "VTODO"]
+
+    recurrence_id: str | None = None
+    summary: str | None = None
+    description: str | None = None
+    location: str | None = None
+
+    dtstart: str | None = None
+    dtend: str | None = None
+    due: str | None = None
+    all_day: int | None = None
+
+    status: str | None = None
+    percent_complete: int | None = None
+    priority: int | None = None
+
+    rrule: str | None = None
+    exdate: str | None = None
+    categories: str | None = None
+    sequence: int | None = None
+
+
+class AgendaEventUpdateBody(BaseModel):
+    # 全部可选；用 exclude_unset 区分“没传” vs “显式传 null”
+    uid: str | None = None
+    kind: Literal["VEVENT", "VTODO"] | None = None
+
+    recurrence_id: str | None = None
+    summary: str | None = None
+    description: str | None = None
+    location: str | None = None
+
+    dtstart: str | None = None
+    dtend: str | None = None
+    due: str | None = None
+    all_day: int | None = None
+
+    status: str | None = None
+    percent_complete: int | None = None
+    priority: int | None = None
+
+    rrule: str | None = None
+    exdate: str | None = None
+    categories: str | None = None
+    sequence: int | None = None
+
+
+# 3) 四个接口：增/查/改/删
+
+@router.post("/agenda/{table_name}/events", description="新增日程/待办（VEVENT/VTODO）")
+async def create_agenda_event(table_name: str, body: AgendaEventCreateBody, db_name: str = "agenda"):
+    try:
+        new_id = await asyncio.to_thread(insert_event, table_name, body.model_dump(exclude_unset=True), db_name)
+        return {"id": new_id}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/agenda/{table_name}/events", description="获取全部日程/待办（按 dtstart/due/created_at 排序）")
+async def get_agenda_events(table_name: str, db_name: str = "agenda"):
+    try:
+        rows = await asyncio.to_thread(list_events, table_name, db_name)
+        return rows
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/agenda/{table_name}/events/{event_id}", description="更新日程/待办（按 id）")
+async def patch_agenda_event(table_name: str, event_id: int, body: AgendaEventUpdateBody, db_name: str = "agenda"):
+    try:
+        payload = body.model_dump(exclude_unset=True)
+        affected = await asyncio.to_thread(update_event, table_name, event_id, payload, db_name)
+        return {"affected": affected}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/agenda/{table_name}/events/{event_id}", description="删除日程/待办（按 id）")
+async def remove_agenda_event(table_name: str, event_id: int, db_name: str = "agenda"):
+    try:
+        affected = await asyncio.to_thread(delete_event, table_name, event_id, db_name)
+        return {"affected": affected}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
 
 @router.post("/img",description="图床功能，上传图片并返回图片链接")
 async def upload_image(img: UploadFile = File(...)):
