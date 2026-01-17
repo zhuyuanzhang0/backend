@@ -35,7 +35,7 @@ def start_scheduler():
     """
     scheduler.add_job(
         qiandao_async,
-        CronTrigger(hour=12, minute=16),  # 每天 9:00
+        CronTrigger(hour=13, minute=00),  # 每天 9:00
         id="qiandao_daily_job",
         replace_existing=True,
     )
