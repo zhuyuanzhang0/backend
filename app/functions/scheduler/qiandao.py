@@ -35,7 +35,7 @@ def start_scheduler():
     """
     scheduler.add_job(
         qiandao_async,
-        CronTrigger(hour=22, minute=40),  # 每天 9:00
+        CronTrigger(hour=12, minute=16),  # 每天 9:00
         id="qiandao_daily_job",
         replace_existing=True,
     )
@@ -70,8 +70,7 @@ def qiandao():
         data=login_data,
         timeout=10
     )
-    logger.info("登录状态码",login_resp.status_code)
-    logger.info("登录响应",login_resp.json())
+    logger.info("登录响应"+login_resp.text)
 
     # 查看登录后拿到的 Cookie（调试用）
     print("登录后 Cookie:")
@@ -94,6 +93,7 @@ def qiandao():
         headers=checkin_headers,
         timeout=10
     )
+    logger.info("登录响应"+str(checkin_resp.json()))
 
     print("签到状态码:", checkin_resp.status_code)
     print("签到结果:", checkin_resp.json())
