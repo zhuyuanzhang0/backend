@@ -4,7 +4,7 @@ import os
 import datetime
 from pydantic import BaseModel
 import json
-from app.functions.common.img import save_image_file
+from app.functions.common.save_file import save_file
 from app.functions.alm.call_llm import calendar_llm, bill_llm, vcode_llm, vcode_llm_text
 from app.db.agenda import insert_event, delete_event, update_event, list_events
 from app.core.config import UPLOAD_DIR
@@ -138,18 +138,17 @@ async def remove_agenda_event(table_name: str, event_id: int, db_name: str = "ag
 
 
 
-
-@router.post("/img",description="图床功能，上传图片并返回图片链接")
-async def upload_image(img: UploadFile = File(...)):
-    if not img.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="请上传图片文件")
-
+@router.post("/save_file", description="文件上传功能，上传文件并返回文件链接")
+async def upload_image(
+    f: UploadFile = File(...),
+    key: Optional[str] = Form(None)
+):
     try:
-        result = await save_image_file(img)
+        result = await save_file(f, key)
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail="图片保存失败，请稍后重试",
+            detail="文件保存失败，请稍后重试",
         )
 
     return result
